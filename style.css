@@ -1,65 +1,127 @@
+/* Body + Text */
 body {
   margin: 0;
   padding: 0;
   font-family: 'Courier New', Courier, monospace;
-  background-color: #0d0d0d;
+  background-color: #000000; /* solid black background */
   color: #e0e0e0;
-  background-image: url('https://www.transparenttextures.com/patterns/asfalt-light.png');
-  background-repeat: repeat;
 }
 
 .container {
   text-align: center;
-  padding: 50px;
+  padding: 60px 20px;
   max-width: 800px;
   margin: auto;
 }
 
-h1 {
-  font-size: 3em;
-  margin-bottom: 10px;
-  color: #ff4d4d;
-  text-shadow: 2px 2px 5px #000;
+/* Glitch Title */
+h1.glitch-title {
+  font-family: 'Creepster', cursive;
+  font-size: 4em;
+  color: #ff1a1a;
+  text-shadow: 0 0 5px #000, 2px 2px 10px #ff0000;
+  animation: glitch-flicker 1.5s infinite alternate;
 }
 
+@keyframes glitch-flicker {
+  0% { opacity: 1; transform: none; }
+  20% { opacity: 0.8; transform: translate(1px, -1px); }
+  40% { opacity: 1; transform: translate(-1px, 1px); }
+  60% { opacity: 0.7; transform: translate(2px, 0); }
+  80% { opacity: 1; transform: translate(-2px, 2px); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* Typewriter Tagline */
 .tagline {
   font-style: italic;
-  color: #aaa;
-  margin-bottom: 30px;
+  color: #cfcfcf;
+  margin: 20px auto 40px;
+  font-size: 1.2em;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid #fff;
 }
 
+.typewriter {
+  animation: typing 4s steps(30) 1s 1 normal both, blink 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink {
+  50% { border-color: transparent }
+}
+
+/* Buttons */
 .btn {
   display: inline-block;
-  padding: 12px 24px;
+  padding: 14px 28px;
   background-color: #222;
   color: #fff;
   text-decoration: none;
   font-weight: bold;
   border: 2px solid #ff4d4d;
-  border-radius: 8px;
-  transition: 0.3s;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px #ff4d4d55;
+  margin: 0 10px; /* space between buttons */
 }
 
 .btn:hover {
   background-color: #ff4d4d;
   color: #000;
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #ff4d4d;
 }
 
+/* Instructions List Styling */
 .instructions {
   text-align: left;
   list-style-type: none;
   padding: 0;
-  margin-top: 20px;
+  margin-top: 15px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 0.95em;  
+  color: #ddd;
+  line-height: 1.3;  
 }
 
 .instructions li {
   background: rgba(255, 255, 255, 0.05);
-  padding: 10px;
+  padding: 8px 12px;
   border-left: 4px solid #ff4d4d;
-  margin-bottom: 10px;
-  transition: background 0.3s;
+  margin-bottom: 8px;
+  transition: background 0.3s ease, border-color 0.3s ease;
+  cursor: default;
+  user-select: none;
 }
 
 .instructions li:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #ff1a1a;
+  cursor: pointer;
+}
+
+/* Icon Styling */
+.icon {
+  margin: 0 auto 20px;
+  display: block;
+  fill: #ff4d4d;
+  stroke: #ff1a1a;
+  stroke-width: 1;
+  filter: drop-shadow(0 0 5px #ff1a1a);
+  animation: flicker-glow 2s infinite alternate;
+  width: 100px;
+  height: 100px;
+}
+
+@keyframes flicker-glow {
+  0% { filter: drop-shadow(0 0 5px #ff1a1a); }
+  100% { filter: drop-shadow(0 0 20px #ff4d4d); }
 }
