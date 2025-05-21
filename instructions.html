@@ -4,23 +4,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>How to Play - Mart Madness</title>
+  <meta name="description" content="Learn how to survive and escape the horror of Mart Madness. Tips, tricks, and warnings." />
+  <link rel="icon" href="favicon.ico" />
   <link rel="stylesheet" href="style.css" />
   <script src="game.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Playfair+Display&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <div class="container">
+  <main class="container">
     <h1 class="glitch-title">Instructions</h1>
     <p class="tagline typewriter">You're just shopping... or so you think.</p>
-    <script src="game.js"></script>
     <ul class="instructions">
       <li>🛒 Explore the mart and collect your grocery list items.</li>
       <li>🧠 Watch your sanity — hallucinations intensify as time goes on.</li>
-      <li>👁️ Don’t trust everything you see... or hear.</li>
+      <li>🕯️ Don’t trust everything you see... or hear.</li>
       <li>🚪 Find the exit. If there even is one.</li>
     </ul>
-    <a href="index.html" class="btn">Back to Home</a>
-  </div>
-  <div class="grain-overlay"></div>
+    <a href="index.html" class="btn" aria-label="Back to home page">Back to Home</a>
+    <button id="audio-toggle" aria-pressed="true" aria-label="Toggle background audio">🔊</button>
+  </main>
+
+  <audio id="creepy-audio" autoplay loop>
+    <source src="creepy-mart.mp3" type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    // Audio toggle button script for instructions page
+    const audio = document.getElementById('creepy-audio');
+    const toggleBtn = document.getElementById('audio-toggle');
+
+    toggleBtn.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play();
+        toggleBtn.setAttribute('aria-pressed', 'true');
+        toggleBtn.textContent = '🔊';
+      } else {
+        audio.pause();
+        toggleBtn.setAttribute('aria-pressed', 'false');
+        toggleBtn.textContent = '🔇';
+      }
+    });
+  </script>
 </body>
 </html>
+
