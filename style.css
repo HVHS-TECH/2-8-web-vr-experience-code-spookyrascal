@@ -1,3 +1,4 @@
+/* Reset & base */
 *,
 *::before,
 *::after {
@@ -7,9 +8,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-image: url("indexbackround.jpg");
-  background-repeat: no-repeat;
-  background-size: auto;
+  background-color: #161311; /* dark, creepy brown-black */
   color: #e3d6ca; /* light creepy beige */
   font-family: 'Montserrat', sans-serif;
   min-height: 100vh;
@@ -17,118 +16,12 @@ body {
   justify-content: center;
   align-items: center;
   overflow-x: hidden;
-  position: relative;
-  z-index: 0;
-}
-
-/* Floating flickering dots container */
-.floating-dots {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none; 
-  z-index: 1; 
-}
-
-/* Each dot style */
-.floating-dots span {
-  position: absolute;
-  background: white;
-  border-radius: 50%;
-  opacity: 0.1;
-  filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-}
-
-/* Example dots with random sizes, positions, and animations */
-.floating-dots span:nth-child(1) {
-  width: 8px;
-  height: 8px;
-  top: 10%;
-  left: 15%;
-  animation-name: float1;
-  animation-duration: 12s;
-  animation-delay: 0s;
-}
-
-.floating-dots span:nth-child(2) {
-  width: 6px;
-  height: 6px;
-  top: 30%;
-  left: 80%;
-  animation-name: float2;
-  animation-duration: 15s;
-  animation-delay: 3s;
-}
-
-.floating-dots span:nth-child(3) {
-  width: 10px;
-  height: 10px;
-  top: 70%;
-  left: 40%;
-  animation-name: float3;
-  animation-duration: 18s;
-  animation-delay: 5s;
-}
-
-.floating-dots span:nth-child(4) {
-  width: 7px;
-  height: 7px;
-  top: 50%;
-  left: 60%;
-  animation-name: float4;
-  animation-duration: 14s;
-  animation-delay: 2s;
-}
-
-.floating-dots span:nth-child(5) {
-  width: 5px;
-  height: 5px;
-  top: 80%;
-  left: 20%;
-  animation-name: float5;
-  animation-duration: 10s;
-  animation-delay: 4s;
-}
-
-/* Floating keyframes */
-@keyframes float1 {
-  0%   { transform: translate(0, 0); opacity: 0.1; }
-  50%  { transform: translate(15px, -10px); opacity: 0.3; }
-  100% { transform: translate(0, 0); opacity: 0.1; }
-}
-
-@keyframes float2 {
-  0%   { transform: translate(0, 0); opacity: 0.15; }
-  50%  { transform: translate(-20px, 10px); opacity: 0.35; }
-  100% { transform: translate(0, 0); opacity: 0.15; }
-}
-
-@keyframes float3 {
-  0%   { transform: translate(0, 0); opacity: 0.1; }
-  50%  { transform: translate(10px, 15px); opacity: 0.4; }
-  100% { transform: translate(0, 0); opacity: 0.1; }
-}
-
-@keyframes float4 {
-  0%   { transform: translate(0, 0); opacity: 0.12; }
-  50%  { transform: translate(-15px, -10px); opacity: 0.3; }
-  100% { transform: translate(0, 0); opacity: 0.12; }
-}
-
-@keyframes float5 {
-  0%   { transform: translate(0, 0); opacity: 0.1; }
-  50%  { transform: translate(10px, -15px); opacity: 0.25; }
-  100% { transform: translate(0, 0); opacity: 0.1; }
 }
 
 /* Container */
 .container {
-  position: relative; /* for stacking */
-  z-index: 10;
+  position: relative; /* needed for ::before positioning */
+  z-index: 1;
   max-width: 600px;
   padding: 2rem 1.5rem;
   text-align: center;
@@ -140,8 +33,6 @@ body {
     inset 0 0 20px 2px #302928;
   backdrop-filter: blur(4px);
 }
-
-/* (Your other styles remain unchanged below here...) */
 
 /* Fade-in animation */
 .fade-in {
@@ -382,3 +273,4 @@ body {
     font-size: 1.1rem;
   }
 }
+
