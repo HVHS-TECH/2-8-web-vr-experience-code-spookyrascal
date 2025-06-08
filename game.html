@@ -4,18 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mart Madness - The Game</title>
-  <meta name="description" content="Dive into the haunted Mart Madness in immersive 3D with A-Frame." />
-  <link rel="icon" href="iconimage.png" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Playfair+Display&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="game.js" defer></script>
-   <audio id="creepy-audio" autoplay loop>
-    <source src="creepy-mart.mp3" type="audio/mpeg" />
-    Your browser does not support the audio element.
-  </audio>
-  <style>
-    /* Inventory Overlay */
+<style>
+    html, body {
+      margin: 0; padding: 0; height: 100%; overflow: hidden;
+      background: #161311;
+      font-family: 'Montserrat', sans-serif;
+    }
+    a-scene {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      background-color: #161311;
+    }
     #inventory {
       position: fixed;
       top: 1rem;
@@ -25,12 +26,9 @@
       border-radius: 8px;
       padding: 0.75rem 1rem;
       color: #e3d6ca;
-      font-family: 'Montserrat', sans-serif;
       max-width: 200px;
       z-index: 9999;
-      box-shadow:
-        0 0 10px 2px #5d5450,
-        inset 0 0 20px 2px #302928;
+      box-shadow: 0 0 10px 2px #5d5450, inset 0 0 20px 2px #302928;
       user-select: none;
     }
     #inventory h2 {
@@ -50,8 +48,6 @@
       margin-bottom: 0.4rem;
       font-size: 1.1rem;
     }
-
-    /* Sanity Meter */
     #sanity-display {
       margin-top: 0.8rem;
       padding-top: 0.5rem;
@@ -60,57 +56,50 @@
       color: #ffaaaa;
       text-align: center;
     }
-
-    /* Floating Dots Background */
-    .floating-dots {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 0;
-    }
-    .floating-dots span {
-      position: absolute;
-      background: #5d5450;
-      border-radius: 50%;
-      opacity: 0.15;
-      animation: floatDots 12s linear infinite;
-    }
-    .floating-dots span:nth-child(1) { width: 15px; height: 15px; top: 10%; left: 20%; animation-delay: 0s; }
-    .floating-dots span:nth-child(2) { width: 20px; height: 20px; top: 70%; left: 80%; animation-delay: 4s; }
-    .floating-dots span:nth-child(3) { width: 10px; height: 10px; top: 50%; left: 50%; animation-delay: 8s; }
-    .floating-dots span:nth-child(4) { width: 18px; height: 18px; top: 30%; left: 70%; animation-delay: 6s; }
-    .floating-dots span:nth-child(5) { width: 12px; height: 12px; top: 80%; left: 40%; animation-delay: 2s; }
-
-    @keyframes floatDots {
-      0%   { transform: translateY(0) translateX(0); }
-      50%  { transform: translateY(-15px) translateX(10px); }
-      100% { transform: translateY(0) translateX(0); }
-    }
   </style>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 </head>
 <body>
-  <!-- Floating dots ambient effect -->
-  <div class="floating-dots" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span>
+
+  <!-- Inventory Display -->
+  <div id="inventory" aria-live="polite" aria-atomic="true" role="region">
+    <h2>Inventory</h2>
+    <ul id="inventory-list"><li>Nothing yet...</li></ul>
+    <div id="sanity-display">Sanity: 100%</div>
   </div>
 
-  <!-- A-Frame Scene -->
-  <a-scene background="color: #161311" fog="type: exponential; color: #161311; density: 0.3" embedded>
-    <!-- Player Camera & Cursor -->
-    <a-entity id="player" camera look-controls wasd-controls position="0 1.6 5">
-      <a-cursor 
-        color="#ff003c"
-        fuse="true" 
-        fuse-timeout="1500"
-        raycaster="objects: .clickable"
-      ></a-cursor>
+  <a-scene fog="type: exponential; color: #161311; density: 0.3" embedded>
+
+    <!-- Player rig with movement & look controls -->
+    <a-entity id="player" position="0 1.6 5" wasd-controls look-controls>
+      <a-entity camera id="camera" position="0 0 0">
+        <a-cursor
+          color="#ff003c"
+          fuse="true"
+          fuse-timeout="1500"
+          raycaster="objects: .clickable"
+        ></a-cursor>
+      </a-entity>
     </a-entity>
 
-    <!-- Helper UI Text -->
+    <!-- Lights -->
+    <a-light type="ambient" color="#555"></a-light>
+    <a-light type="point" intensity="0.8" position="0 4 0"></a-light>
+
+    <!-- Ground -->
+    <a-plane rotation="-90 0 0" width="20" height="20" color="#49403E"></a-plane>
+
+    <!-- Walls -->
+    <a-box position="0 2 -10" depth="0.5" height="4" width="20" color="#302928"></a-box>
+    <a-box position="0 2 10" depth="0.5" height="4" width="20" color="#302928"></a-box>
+    <a-box position="-10 2 0" depth="20" height="4" width="0.5" color="#302928"></a-box>
+    <a-box position="10 2 0" depth="20" height="4" width="0.5" color="#302928"></a-box>
+
+    <!-- Clickable items -->
+   <a-box id="item1" class="clickable" position="0 0.5 -3" depth="1" height="1" width="1" color="#ff003c"></a-box>
+    <a-box id="item2" class="clickable" position="0 0.9 3" depth="1" height="1" width="1" color="#ff003c"></a-box>
+
+    <!-- Text instructions -->
     <a-text
       value="Look & click the glowing boxes to collect items!"
       position="0 3 -3"
@@ -121,36 +110,64 @@
       font="mozillavr"
     ></a-text>
 
-    <!-- Lighting -->
-    <a-light type="ambient" color="#302928" intensity="0.4"></a-light>
-    <a-light id="flicker-light" type="point" position="0 4 0" intensity="0.7" color="#ff003c"></a-light>
-
-    <!-- Environment -->
-    <a-plane rotation="-90 0 0" width="20" height="20" color="#49403E"></a-plane>
-    <a-box position="0 2 -10" depth="0.5" height="4" width="20" color="#302928"></a-box>
-    <a-box position="0 2 10" depth="0.5" height="4" width="20" color="#302928"></a-box>
-    <a-box position="-10 2 0" depth="20" height="4" width="0.5" color="#302928"></a-box>
-    <a-box position="10 2 0" depth="20" height="4" width="0.5" color="#302928"></a-box>
-
-    <!-- Collectible Items -->
-    <a-box class="clickable" id="item1" position="2 0.5 -5" depth="0.5" height="1" width="1" color="#00fff9" 
-      event-set__mouseenter="_event: mouseenter; color: #ff003c" 
-      event-set__mouseleave="_event: mouseleave; color: #00fff9"
-    ></a-box>
-
-    <a-box class="clickable" id="item2" position="-3 0.5 -7" depth="0.5" height="1" width="1" color="#ff003c"
-      event-set__mouseenter="_event: mouseenter; color: #00fff9" 
-      event-set__mouseleave="_event: mouseleave; color: #ff003c"
-    ></a-box>
   </a-scene>
 
-  <!-- Inventory Panel -->
-  <div id="inventory" aria-live="polite" aria-atomic="true" role="region">
-    <h2>Inventory</h2>
-    <ul id="inventory-list">
-      <li>Nothing yet...</li>
-    </ul>
-    <div id="sanity-display">Sanity: 100%</div>
-  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const collectedItems = new Set();
+      const inventoryList = document.getElementById('inventory-list');
+      const sanityDisplay = document.getElementById('sanity-display');
+      let sanity = 100;
+      const scene = document.querySelector('a-scene');
+
+      function updateInventory() {
+        inventoryList.innerHTML = collectedItems.size === 0
+          ? '<li>Nothing yet...</li>'
+          : Array.from(collectedItems)
+              .map(id => `<li>${id.replace('item', 'Item ')}</li>`)
+              .join('');
+      }
+
+      function updateSanityDisplay() {
+        sanityDisplay.textContent = `Sanity: ${sanity}%`;
+      }
+
+      function triggerHallucination() {
+        scene.setAttribute('fog', 'type: exponential; color: #330033; density: 0.4');
+        // Add other hallucination effects here if you want
+      }
+
+      function onItemClicked(evt) {
+        const el = evt.target;
+        const id = el.getAttribute('id');
+        if (!collectedItems.has(id)) {
+          collectedItems.add(id);
+          el.setAttribute('visible', 'false');
+          updateInventory();
+          sanity = Math.max(0, sanity - 10);
+          updateSanityDisplay();
+          alert(`You picked up ${id.replace('item', 'Item ')}. Your sanity slips...`);
+          if (sanity <= 50) {
+            triggerHallucination();
+          }
+        }
+      }
+
+      function setupListeners() {
+        const items = scene.querySelectorAll('.clickable');
+        items.forEach(item => item.addEventListener('click', onItemClicked));
+      }
+
+      if (scene.hasLoaded) {
+        setupListeners();
+      } else {
+        scene.addEventListener('loaded', setupListeners);
+      }
+
+      updateInventory();
+      updateSanityDisplay();
+    });
+  </script>
+
 </body>
 </html>

@@ -1,54 +1,58 @@
 document.addEventListener('DOMContentLoaded', () => {
   const collectedItems = new Set();
   const inventoryList = document.getElementById('inventory-list');
-  const sanityDisplay = document.getElementById('sanity-display'); // Create this in your HTML
-  let sanity = 100; // Start with full sanity
+  const sanityDisplay = document.getElementById('sanity-display');
+  let sanity = 100;
+  const scene = document.querySelector('a-scene');
+  const player = document.getElementById('player');
+  const flickerLight = document.getElementById('flicker-light');
 
-  // Update inventory UI
+  // INVENTORY SYSTEM
   function updateInventory() {
-    if (collectedItems.size === 0) {
-      inventoryList.innerHTML = '<li>Nothing yet...</li>';
-    } else {
-      inventoryList.innerHTML = '';
-      collectedItems.forEach(itemId => {
-        const li = document.createElement('li');
-        li.textContent = itemId.replace('item', 'Item ');
-        inventoryList.appendChild(li);
-      });
-    }
+    inventoryList.innerHTML = collectedItems.size === 0
+      ? '<li>Nothing yet...</li>'
+      : Array.from(collectedItems)
+          .map(id => `<li>${id.replace('item', 'Item ')}</li>`)
+          .join('');
   }
 
-  // Update sanity UI
+  // SANITY SYSTEM
   function updateSanityDisplay() {
     sanityDisplay.textContent = `Sanity: ${sanity}%`;
   }
 
-  // Trigger hallucination effects
+  // TRIPPY HALLUCINATION EFFECT
   function triggerHallucination() {
-    const sceneEl = document.querySelector('a-scene');
-    // Example hallucination effect: fog and color shift
-    sceneEl.setAttribute('fog', 'type: linear; color: #770077; near: 1; far: 20');
-    sceneEl.setAttribute('animation__hallucinate', {
-      property: 'background-color',
-      to: '#550055',
-      dur: 1000,
-      loop: true,
-      dir: 'alternate'
-    });
+    scene.setAttribute('fog', 'type: exponential; color: #330033; density: 0.4');
+    flickerLight.setAttribute('color', '#ff66ff');
+
+    // Camera shake effect
+    let shakeTime = 1000;
+    const interval = 50;
+    const originalPosition = player.getAttribute('position');
+    const shake = setInterval(() => {
+      const x = originalPosition.x + (Math.random() - 0.5) * 0.05;
+      const y = originalPosition.y + (Math.random() - 0.5) * 0.05;
+      const z = originalPosition.z + (Math.random() - 0.5) * 0.05;
+      player.setAttribute('position', `${x} ${y} ${z}`);
+    }, interval);
+
+    setTimeout(() => {
+      clearInterval(shake);
+      player.setAttribute('position', originalPosition); // Reset
+    }, shakeTime);
   }
 
-  // Flicker effect for light
-  const flickerLight = document.getElementById('flicker-light');
+  // FLICKERING LIGHT LOOP
   function flicker() {
-    flickerLight.setAttribute('intensity', (0.5 + Math.random() * 0.4).toFixed(2));
-    setTimeout(flicker, 150 + Math.random() * 350);
+    if (flickerLight) {
+      flickerLight.setAttribute('intensity', (0.4 + Math.random() * 0.5).toFixed(2));
+    }
+    setTimeout(flicker, 150 + Math.random() * 300);
   }
   flicker();
 
-  // Get the scene element
-  const scene = document.querySelector('a-scene');
-
-  // Click handler
+  // ITEM COLLECTION
   function onItemClicked(evt) {
     const el = evt.target;
     const id = el.getAttribute('id');
@@ -58,26 +62,22 @@ document.addEventListener('DOMContentLoaded', () => {
       el.setAttribute('visible', 'false');
       updateInventory();
 
-      // Decrease sanity
-      sanity -= 10;
-      if (sanity < 0) sanity = 0;
+      // Lower sanity
+      sanity = Math.max(0, sanity - 10);
       updateSanityDisplay();
 
-      alert(`You picked up ${id.replace('item', 'Item ')}! Your sanity slips...`);
+      alert(`You picked up ${id.replace('item', 'Item ')}. Your sanity slips...`);
 
-      // Hallucinate if sanity is low
       if (sanity <= 50) {
         triggerHallucination();
       }
     }
   }
 
-  // Setup listeners
+  // ADD CLICK LISTENERS
   function setupListeners() {
     const items = scene.querySelectorAll('.clickable');
-    items.forEach(item => {
-      item.addEventListener('click', onItemClicked);
-    });
+    items.forEach(item => item.addEventListener('click', onItemClicked));
   }
 
   if (scene.hasLoaded) {
@@ -88,4 +88,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateInventory();
   updateSanityDisplay();
+
+  // HEAD BOBBING ANIMATION
+  let isMoving = false;
+  let bobAmount = 0;
+  function animateBobbing() {
+    const pos = player.getAttribute('position');
+    const newY = 1.6 + Math.sin(bobAmount) * 0.03;
+    player.setAttribute('position', `${pos.x} ${newY} ${pos.z}`);
+    if (isMoving) bobAmount += 0.2;
+    requestAnimationFrame(animateBobbing);
+  }
+  animateBobbing();
+
+  // DETECT WASD MOVEMENT KEYS
+  const movementKeys = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD']);
+  document.addEventListener('keydown', e => {
+    if (movementKeys.has(e.code)) isMoving = true;
+  });
+  document.addEventListener('keyup', e => {
+    if (movementKeys.has(e.code)) isMoving = false;
+  });
 });
