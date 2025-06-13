@@ -2,172 +2,75 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mart Madness - The Game</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Playfair+Display&display=swap" rel="stylesheet" />
-<style>
-    html, body {
-      margin: 0; padding: 0; height: 100%; overflow: hidden;
-      background: #161311;
-      font-family: 'Montserrat', sans-serif;
-    }
-    a-scene {
-      width: 100vw;
-      height: 100vh;
-      display: block;
-      background-color: #161311;
-    }
-    #inventory {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      background: rgba(20, 15, 10, 0.85);
-      border: 2px solid #5d5450;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      color: #e3d6ca;
-      max-width: 200px;
-      z-index: 9999;
-      box-shadow: 0 0 10px 2px #5d5450, inset 0 0 20px 2px #302928;
-      user-select: none;
-    }
-    #inventory h2 {
-      font-family: 'Playfair Display', serif;
-      margin: 0 0 0.5rem;
-      font-weight: 700;
-      font-size: 1.3rem;
-      letter-spacing: 0.1em;
-      text-align: center;
-    }
-    #inventory ul {
-      margin: 0;
-      padding-left: 1.2rem;
-      list-style: square;
-    }
-    #inventory ul li {
-      margin-bottom: 0.4rem;
-      font-size: 1.1rem;
-    }
-    #sanity-display {
-      margin-top: 0.8rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid #5d5450;
-      font-size: 1.05rem;
-      color: #ffaaaa;
-      text-align: center;
-    }
-  </style>
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <title>Night Shift</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+  
+  <!-- Your Styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <a-scene 
+    fog="type: exponential; color: #161311; density: 0.03" 
+    background="color: #000" 
+    shadow="type: pcfsoft" 
+    physics="gravity: -9.8; debug: false"
+  >
+    <!-- Assets -->
+    <a-assets>
+      <a-asset-item id="supermarketModel" src="supermarket.glb"></a-asset-item>
+      <a-asset-item id="mannequinModel" src="mannequin.glb"></a-asset-item>
+      <audio id="ambient-sound" src="creepy-mart.mp3" preload="auto"></audio>
+    </a-assets>
 
-  <!-- Inventory Display -->
-  <div id="inventory" aria-live="polite" aria-atomic="true" role="region">
-    <h2>Inventory</h2>
-    <ul id="inventory-list"><li>Nothing yet...</li></ul>
-    <div id="sanity-display">Sanity: 100%</div>
-  </div>
+    <!-- Environment -->
+    <a-entity gltf-model="#supermarketModel" position="0 0 0" scale="1 1 1" static-body></a-entity>
 
-  <a-scene fog="type: exponential; color: #161311; density: 0.3" embedded>
+    <!-- Ground Plane (static for physics collisions) -->
+    <a-plane rotation="-90 0 0" width="100" height="100" color="#222" static-body></a-plane>
 
-    <!-- Player rig with movement & look controls -->
-    <a-entity id="player" position="0 1.6 5" wasd-controls look-controls>
-      <a-entity camera id="camera" position="0 0 0">
-        <a-cursor
-          color="#ff003c"
-          fuse="true"
-          fuse-timeout="1500"
-          raycaster="objects: .clickable"
-        ></a-cursor>
-      </a-entity>
+    <!-- Lighting -->
+    <a-entity id="flicker-light" light="type: point; color: #ffffff; intensity: 0.6; distance: 20" position="0 5 0"></a-entity>
+    <a-entity light="type: ambient; color: #222"></a-entity>
+
+    <!-- Player Rig -->
+    <a-entity id="rig" position="0 1.6 3" movement-controls="speed: 0.1; constrainToNavMesh: false" kinematic-body>
+      <a-camera 
+        id="playerCamera" 
+        look-controls="pointerLockEnabled: true" 
+        wasd-controls="acceleration: 20" 
+        position="0 0 0"
+      >
+        <a-entity cursor="fuse: false; rayOrigin: mouse" 
+                  raycaster="objects: .clickable"
+                  position="0 0 -1"
+                  geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.015"
+                  material="color: white; shader: flat"
+        ></a-entity>
+      </a-camera>
     </a-entity>
 
-    <!-- Lights -->
-    <a-light type="ambient" color="#555"></a-light>
-    <a-light type="point" intensity="0.8" position="0 4 0"></a-light>
+    <!-- Interactive Items -->
+    <a-box id="item1" class="clickable" position="2 1 -3" depth="0.3" height="0.3" width="0.3" color="#f55" static-body></a-box>
+    <a-box id="item2" class="clickable" position="-3 1 -2" depth="0.3" height="0.3" width="0.3" color="#5f5" static-body></a-box>
 
-    <!-- Ground -->
-    <a-plane rotation="-90 0 0" width="20" height="20" color="#49403E"></a-plane>
+    <!-- Mannequins -->
+    <a-entity id="mannequins" stalker>
+      <a-entity id="mannequin1" class="mannequin" gltf-model="#mannequinModel" position="4 0 -2" scale="1 1 1" static-body></a-entity>
+      <a-entity id="mannequin2" class="mannequin" gltf-model="#mannequinModel" position="-3 0 -5" scale="1 1 1" static-body></a-entity>
+      <a-entity id="mannequin3" class="mannequin" gltf-model="#mannequinModel" position="1 0 6" scale="1 1 1" static-body></a-entity>
+    </a-entity>
 
-    <!-- Walls -->
-    <a-box position="0 2 -10" depth="0.5" height="4" width="20" color="#302928"></a-box>
-    <a-box position="0 2 10" depth="0.5" height="4" width="20" color="#302928"></a-box>
-    <a-box position="-10 2 0" depth="20" height="4" width="0.5" color="#302928"></a-box>
-    <a-box position="10 2 0" depth="20" height="4" width="0.5" color="#302928"></a-box>
-
-    <!-- Clickable items -->
-   <a-box id="item1" class="clickable" position="0 0.5 -3" depth="1" height="1" width="1" color="#ff003c"></a-box>
-    <a-box id="item2" class="clickable" position="0 0.9 3" depth="1" height="1" width="1" color="#ff003c"></a-box>
-
-    <!-- Text instructions -->
-    <a-text
-      value="Look & click the glowing boxes to collect items!"
-      position="0 3 -3"
-      align="center"
-      color="#ff003c"
-      width="6"
-      opacity="0.7"
-      font="mozillavr"
-    ></a-text>
+    <!-- HUD -->
+    <a-entity id="hud" position="0 2 -1">
+      <a-text id="sanity-display" value="Sanity: 100%" color="#FFF" position="-0.8 0.5 0" width="2"></a-text>
+      <a-text id="inventory-label" value="Inventory:" color="#FFF" position="-0.8 0.3 0" width="2"></a-text>
+      <a-text id="inventory-list" value="Nothing yet..." color="#FFF" position="-0.8 0.1 0" width="2"></a-text>
+    </a-entity>
 
   </a-scene>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const collectedItems = new Set();
-      const inventoryList = document.getElementById('inventory-list');
-      const sanityDisplay = document.getElementById('sanity-display');
-      let sanity = 100;
-      const scene = document.querySelector('a-scene');
-
-      function updateInventory() {
-        inventoryList.innerHTML = collectedItems.size === 0
-          ? '<li>Nothing yet...</li>'
-          : Array.from(collectedItems)
-              .map(id => `<li>${id.replace('item', 'Item ')}</li>`)
-              .join('');
-      }
-
-      function updateSanityDisplay() {
-        sanityDisplay.textContent = `Sanity: ${sanity}%`;
-      }
-
-      function triggerHallucination() {
-        scene.setAttribute('fog', 'type: exponential; color: #330033; density: 0.4');
-        // Add other hallucination effects here if you want
-      }
-
-      function onItemClicked(evt) {
-        const el = evt.target;
-        const id = el.getAttribute('id');
-        if (!collectedItems.has(id)) {
-          collectedItems.add(id);
-          el.setAttribute('visible', 'false');
-          updateInventory();
-          sanity = Math.max(0, sanity - 10);
-          updateSanityDisplay();
-          alert(`You picked up ${id.replace('item', 'Item ')}. Your sanity slips...`);
-          if (sanity <= 50) {
-            triggerHallucination();
-          }
-        }
-      }
-
-      function setupListeners() {
-        const items = scene.querySelectorAll('.clickable');
-        items.forEach(item => item.addEventListener('click', onItemClicked));
-      }
-
-      if (scene.hasLoaded) {
-        setupListeners();
-      } else {
-        scene.addEventListener('loaded', setupListeners);
-      }
-
-      updateInventory();
-      updateSanityDisplay();
-    });
-  </script>
-
+  <script src="game.js"></script>
 </body>
 </html>
