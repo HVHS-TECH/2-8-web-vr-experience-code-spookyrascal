@@ -6,39 +6,51 @@
   <title>Mart Madness</title>
   <link rel="icon" href="favicon.ico" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="iconimage.png" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Playfair+Display&display=swap" rel="stylesheet" />
   <script src="game.js" defer></script>
+
+  <style>
+    /* Moved audio-warning style here for better organization */
+    .audio-warning {
+      margin-top: 10px;
+      font-size: 1rem;
+      font-style: italic;
+      color: #ff4444;
+    }
+  </style>
 </head>
 <body>
 
+  <!-- Glitchy Dots Background -->
   <div class="floating-dots" aria-hidden="true">
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
   </div>
 
+  <!-- Start Menu Content -->
   <main class="container fade-in">
     <h1 class="glitch-title">Mart Madness</h1>
     <p class="tagline typewriter">Feed Into Your Delusions...</p>
+    <p class="audio-warning">🎧 Headphones Recommended</p>
+
+    <!-- Navigation Buttons -->
     <div class="btn-group" role="group" aria-label="Navigation buttons">
       <a href="instructions.html" class="btn" aria-label="How to play Mart Madness">How to Play</a>
       <a href="game.html" class="btn enter-btn" aria-label="Enter the Mart Madness game">Enter the Game</a>
     </div>
-    <button id="audio-toggle" aria-pressed="true" aria-label="Toggle background audio">🔊</button>
+
+    <!-- Audio Toggle -->
+    <button id="audio-toggle" aria-pressed="true" aria-label="Toggle background audio" type="button">🔊</button>
   </main>
 
+  <!-- Creepy Background Audio -->
   <audio id="creepy-audio" autoplay loop>
     <source src="creepy-mart.mp3" type="audio/mpeg" />
     Your browser does not support the audio element.
   </audio>
 
+  <!-- Toggle Audio Script -->
   <script>
-    // Audio toggle button script
     const audio = document.getElementById('creepy-audio');
     const toggleBtn = document.getElementById('audio-toggle');
 
@@ -53,9 +65,15 @@
         toggleBtn.textContent = '🔇';
       }
     });
+
+    // Accessibility: toggle audio with keyboard (space/enter)
+    toggleBtn.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        toggleBtn.click();
+      }
+    });
   </script>
 
 </body>
 </html>
-
-

@@ -2,21 +2,132 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>How to Play - Mart Madness</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Playfair+Display&display=swap');
+
+    /* Reset & basics */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #161311 0%, #2a221d 100%);
+      font-family: 'Montserrat', sans-serif;
+      color: #e3d6ca;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+      user-select: none;
+    }
+
+    .container {
+      background: rgba(30, 22, 17, 0.85);
+      border: 2px solid #5d5450;
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      max-width: 400px;
+      box-shadow: 0 0 15px 3px #ff003c, inset 0 0 25px 5px #302928;
+      animation: pulseGlow 4s infinite alternate ease-in-out;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      color: #ff003c;
+      text-shadow: 0 0 10px #ff003c;
+    }
+
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 1.6rem;
+      font-style: italic;
+      color: #f0c7c7;
+      text-shadow: 0 0 6px #7a1a1a;
+    }
+
+    ul.instructions {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      text-align: left;
+    }
+
+    ul.instructions li {
+      margin-bottom: 1rem;
+      padding-left: 1.4rem;
+      position: relative;
+      line-height: 1.4;
+      color: #f2d7d7;
+      text-shadow: 0 0 6px #ff003c;
+    }
+    ul.instructions li::before {
+      content: attr(data-icon);
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+
+    /* Use emojis as icons with data-icon attributes for accessibility */
+    ul.instructions li:nth-child(1)::before { content: "🛒"; }
+    ul.instructions li:nth-child(2)::before { content: "🧠"; }
+    ul.instructions li:nth-child(3)::before { content: "👁️"; }
+    ul.instructions li:nth-child(4)::before { content: "🚪"; }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #ff003c;
+      background: transparent;
+      border: 2px solid #ff003c;
+      border-radius: 8px;
+      text-decoration: none;
+      box-shadow: 0 0 10px #ff003c;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn:hover,
+    .btn:focus {
+      background: #ff003c;
+      color: #161311;
+      box-shadow: 0 0 18px 6px #ff003c;
+      outline: none;
+    }
+
+    /* Subtle pulse glow animation */
+    @keyframes pulseGlow {
+      0% {
+        box-shadow: 0 0 10px 2px #ff003c, inset 0 0 15px 3px #302928;
+      }
+      100% {
+        box-shadow: 0 0 20px 5px #ff003c, inset 0 0 25px 8px #302928;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Instructions</h1>
+  <div class="container" role="main" aria-labelledby="pageTitle">
+    <h1 id="pageTitle">Instructions</h1>
     <p>You're just shopping... or so you think.</p>
-    <ul class="instructions">
-      <li>🛒 Explore the mart and collect your grocery list items.</li>
-      <li>🧠 Watch your sanity — hallucinations intensify as time goes on.</li>
-      <li>👁️ Don’t trust everything you see... or hear.</li>
-      <li>🚪 Find the exit. If there even is one.</li>
+    <ul class="instructions" aria-live="polite">
+      <li>Explore the mart and collect your grocery list items.</li>
+      <li>Watch your sanity — hallucinations intensify as time goes on.</li>
+      <li>Don’t trust everything you see... or hear.</li>
+      <li>Find the exit. If there even is one.</li>
     </ul>
-    <a href="index.html" class="btn">Back to Home</a>
+    <a href="index.html" class="btn" role="button">Back to Home</a>
   </div>
 </body>
 </html>

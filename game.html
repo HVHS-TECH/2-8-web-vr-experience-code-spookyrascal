@@ -2,75 +2,588 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Night Shift</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
-  
-  <!-- Your Styles -->
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mart Madnes</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Playfair+Display&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Theme variables for easy color tweaks */
+    :root {
+      --bg-color: #161311;
+      --text-color: #e3d6ca;
+      --accent-red: #ff003c;
+      --accent-red-glow: #ff6f6f;
+      --scrollbar-thumb: #5d5450;
+      --inventory-bg: rgba(20, 15, 10, 0.85);
+      --inventory-border: #5d5450;
+      --font-primary: 'Montserrat', sans-serif;
+      --font-display: 'Playfair Display', serif;
+    }
+
+    /* Reset & base */
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      overflow: hidden;
+      background: var(--bg-color);
+      font-family: var(--font-primary);
+      color: var(--text-color);
+    }
+
+    a-scene {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      background-color: var(--bg-color);
+    }
+
+    /* Inventory panel */
+    #inventory {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--inventory-bg);
+      border: 2px solid var(--inventory-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      max-width: 220px;
+      box-shadow: 0 0 10px 2px var(--inventory-border), inset 0 0 20px 2px #302928;
+      user-select: none;
+      font-size: 14px;
+      z-index: 9999;
+    }
+
+    #inventory h2 {
+      font-family: var(--font-display);
+      margin: 0 0 0.5rem;
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      text-align: center;
+      text-shadow: 0 0 6px  color=#ff003c
+    }
+
+    #inventory ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      list-style: square;
+      min-height: 5rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    #inventory ul li {
+      margin-bottom: 0.4rem;
+      font-size: 1.1rem;
+      color: #f2d7d7;
+      cursor: default;
+    }
+
+    /* Custom scrollbar for inventory list */
+    #inventory ul::-webkit-scrollbar {
+      width: 6px;
+    }
+    #inventory ul::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #inventory ul::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 3px;
+    }
+
+    #sanity-display {
+      margin-top: 0.8rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--inventory-border);
+      font-size: 1.1rem;
+      /* Color will be set dynamically */
+      text-align: center;
+      text-shadow: 0 0 6px var(--accent-red-glow);
+      user-select: none;
+    }
+
+    #notification {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #ff5555;
+      text-align: center;
+      min-height: 1.3rem;
+      font-style: italic;
+      transition: opacity 0.5s ease-in-out;
+      opacity: 0;
+      user-select: none;
+      text-shadow: 0 0 6px  color=#ff003c
+    }
+
+    #notification.show {
+      opacity: 1;
+    }
+
+    /* Cursor */
+    a-cursor {
+      outline: none;
+      border-radius: 50%;
+      box-shadow: 0 0 8px 2px ;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+    a-cursor:hover, a-cursor:focus {
+      box-shadow: 0 0 12px 4px  color=#ff003c
+    }
+
+    /* Clickable items style */
+    .clickable {
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .clickable:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px 3px  color=#ff003c
+    }
+  </style>
+
+  <!-- A-Frame libs -->
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+
 </head>
 <body>
-  <a-scene 
-    fog="type: exponential; color: #161311; density: 0.03" 
-    background="color: #000" 
-    shadow="type: pcfsoft" 
-    physics="gravity: -9.8; debug: false"
-  >
-    <!-- Assets -->
-    <a-assets>
-      <a-asset-item id="supermarketModel" src="supermarket.glb"></a-asset-item>
-      <a-asset-item id="mannequinModel" src="mannequin.glb"></a-asset-item>
-      <audio id="ambient-sound" src="creepy-mart.mp3" preload="auto"></audio>
-    </a-assets>
 
-    <!-- Environment -->
-    <a-entity gltf-model="#supermarketModel" position="0 0 0" scale="1 1 1" static-body></a-entity>
+  <div id="inventory" aria-live="polite" aria-atomic="true" role="region" aria-label="Player Inventory and Status">
+    <h2>Inventory</h2>
+    <ul id="inventory-list" role="list" aria-label="Inventory items">
+      <li role="listitem" tabindex="0">Nothing yet...</li>
+    </ul>
+    <div id="sanity-display" aria-live="polite" aria-atomic="true" aria-label="Sanity Level">Sanity: 100%</div>
+    <div id="notification" role="alert" aria-live="assertive"></div>
+  </div>
 
-    <!-- Ground Plane (static for physics collisions) -->
-    <a-plane rotation="-90 0 0" width="100" height="100" color="#222" static-body></a-plane>
+  <a-scene shadow="type:pcfsoft" embedded>
+    <!-- Ambient lighting -->
+    <a-light type="ambient" color="#3a322f" intensity="0.4"></a-light>
 
-    <!-- Lighting -->
-    <a-entity id="flicker-light" light="type: point; color: #ffffff; intensity: 0.6; distance: 20" position="0 5 0"></a-entity>
-    <a-entity light="type: ambient; color: #222"></a-entity>
+    <!-- Main point light with shadows -->
+    <a-light
+      type="point"
+      intensity="0.7"
+      position="0 6 0"
+      cast-shadow="true"
+      shadow-map-width="1024"
+      shadow-map-height="1024"
+      shadow-camera-near="0.1"
+      shadow-camera-far="20"
+    ></a-light>
 
-    <!-- Player Rig -->
-    <a-entity id="rig" position="0 1.6 3" movement-controls="speed: 0.1; constrainToNavMesh: false" kinematic-body>
-      <a-camera 
-        id="playerCamera" 
-        look-controls="pointerLockEnabled: true" 
-        wasd-controls="acceleration: 20" 
-        position="0 0 0"
-      >
-        <a-entity cursor="fuse: false; rayOrigin: mouse" 
-                  raycaster="objects: .clickable"
-                  position="0 0 -1"
-                  geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.015"
-                  material="color: white; shader: flat"
-        ></a-entity>
+    <!-- Spotlight to add moody red glow -->
+    <a-light
+      type="spot"
+      position="0 5 15"
+      angle="0.4"
+      penumbra="0.3"
+      color="var(--accent-red)"
+      intensity="0.8"
+      cast-shadow="true"
+      shadow-map-width="2048"
+      shadow-map-height="2048"
+      shadow-camera-near="0.5"
+      shadow-camera-far="30"
+      target="#player"
+    ></a-light>
+
+    <!-- Hanging lights group -->
+    <a-entity id="hanging-lights" light="castShadow: false">
+      <a-cylinder position="-15 5 -10" radius="0.05" height="1.2" color="#4b3a2f" shadow="cast: false"></a-cylinder>
+      <a-sphere position="-15 4.2 -10" radius="0.15" color="#f7e8d0" emissive="#ffd588" emissiveIntensity="0.8" shadow="cast: true">
+        <a-light type="point" intensity="0.8" distance="5" color="#ffd588"></a-light>
+      </a-sphere>
+
+      <a-cylinder position="-5 5 -5" radius="0.05" height="1.2" color="#4b3a2f" shadow="cast: false"></a-cylinder>
+      <a-sphere position="-5 4.2 -5" radius="0.15" color="#f7e8d0" emissive="#ffd588" emissiveIntensity="0.8" shadow="cast: true">
+        <a-light type="point" intensity="0.8" distance="5" color="#ffd588"></a-light>
+      </a-sphere>
+
+      <a-cylinder position="5 5 -2" radius="0.05" height="1.2" color="#4b3a2f" shadow="cast: false"></a-cylinder>
+      <a-sphere position="5 4.2 -2" radius="0.15" color="#f7e8d0" emissive="#ffd588" emissiveIntensity="0.8" shadow="cast: true">
+        <a-light type="point" intensity="0.8" distance="5" color="#ffd588"></a-light>
+      </a-sphere>
+
+      <a-cylinder position="15 5 -8" radius="0.05" height="1.2" color="#4b3a2f" shadow="cast: false"></a-cylinder>
+      <a-sphere position="15 4.2 -8" radius="0.15" color="#f7e8d0" emissive="#ffd588" emissiveIntensity="0.8" shadow="cast: true">
+        <a-light type="point" intensity="0.8" distance="5" color="#ffd588"></a-light>
+      </a-sphere>
+    </a-entity>
+
+    <!-- Floor -->
+    <a-plane rotation="-90 0 0" width="200" height="200" color="#49403E" shadow="receive: true"></a-plane>
+
+    <!-- **SHELVES CONTAINER HERE** -->
+    <a-entity id="shelves-container" position="0 0 0"></a-entity>
+
+    <!-- **MANNEQUINS CONTAINER HERE** -->
+    <a-entity id="mannequins-container" position="0 0 0"></a-entity>
+
+    <!-- walls -->
+    <a-box position="0 3 -100" depth="0.5" height="6" width="200" color="#302928" shadow="cast: true"></a-box>
+    <a-box position="0 3 100" depth="0.5" height="6" width="200" color="#302928" shadow="cast: true"></a-box>
+    <a-box position="-100 3 0" depth="200" height="6" width="0.5" color="#302928" shadow="cast: true"></a-box>
+    <a-box position="100 3 0" depth="200" height="6" width="0.5" color="#302928" shadow="cast: true"></a-box>
+
+    <!-- Ceiling -->
+    <a-box position="0 6 0" depth="200" height="0.5" width="200" color="#1a1513" shadow="cast: true"></a-box>
+
+    <!-- Glowing aisle signs spaced far apart -->
+    <a-text
+      value="Snacks"
+      position="0 4 -18"
+      align="center"
+      color="var(--accent-red)"
+      width="8"
+      shader="msdf"
+      font="mozillavr"
+      emissive="var(--accent-red)"
+      emissiveIntensity="1.5"
+    ></a-text>
+
+    <a-text
+      value="Drinks"
+      position="0 4 2"
+      align="center"
+      color="#00ffff"
+      width="8"
+      shader="msdf"
+      font="mozillavr"
+      emissive="#00ffff"
+      emissiveIntensity="1.5"
+    ></a-text>
+
+    <a-text
+      value="Produce"
+      position="0 4 22"
+      align="center"
+      color="#7CFC00"
+      width="8"
+      shader="msdf"
+      font="mozillavr"
+      emissive="#7CFC00"
+      emissiveIntensity="1.5"
+    ></a-text>
+
+    <!-- Checkout counter way out of reach -->
+    <a-box
+      position="0 1 120"
+      depth="4"
+      height="2"
+      width="10"
+      color="#4a3f35"
+      shadow="cast: true"
+      animation="property: material.emissiveIntensity; dir: alternate; dur: 3500; loop: true; to: 0.9"
+      aria-label="Checkout counter"
+    ></a-box>
+
+    <a-text
+      value="Checkout"
+      position="0 3 120"
+      align="center"
+      color="var(--accent-red)"
+      width="10"
+      font="mozillavr"
+      emissive="var(--accent-red)"
+      emissiveIntensity="2"
+      material="shader: standard"
+      shadow="cast: true"
+      aria-label="Checkout sign"
+    ></a-text>
+
+    <a-entity
+      position="0 4 120"
+      id="neon-sign"
+      light="type: point; color:  color=#ff003c intensity: 0.7; distance: 6; decay: 2"
+      aria-hidden="true"
+    ></a-entity>
+
+    <!-- Player and camera setup -->
+    <a-entity id="player" position="0 0 10" role="region" aria-label="Player position">
+      <a-camera position="0 1.6 0" wasd-controls look-controls player-controls>
+        <a-cursor
+          color="var(--accent-red)"
+          fuse="true"
+          fuse-timeout="500"
+          geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+          material="color:  color=#ff003c shader: flat"
+          aria-label="Gaze cursor"
+        ></a-cursor>
       </a-camera>
     </a-entity>
 
-    <!-- Interactive Items -->
-    <a-box id="item1" class="clickable" position="2 1 -3" depth="0.3" height="0.3" width="0.3" color="#f55" static-body></a-box>
-    <a-box id="item2" class="clickable" position="-3 1 -2" depth="0.3" height="0.3" width="0.3" color="#5f5" static-body></a-box>
-
-    <!-- Mannequins -->
-    <a-entity id="mannequins" stalker>
-      <a-entity id="mannequin1" class="mannequin" gltf-model="#mannequinModel" position="4 0 -2" scale="1 1 1" static-body></a-entity>
-      <a-entity id="mannequin2" class="mannequin" gltf-model="#mannequinModel" position="-3 0 -5" scale="1 1 1" static-body></a-entity>
-      <a-entity id="mannequin3" class="mannequin" gltf-model="#mannequinModel" position="1 0 6" scale="1 1 1" static-body></a-entity>
-    </a-entity>
-
-    <!-- HUD -->
-    <a-entity id="hud" position="0 2 -1">
-      <a-text id="sanity-display" value="Sanity: 100%" color="#FFF" position="-0.8 0.5 0" width="2"></a-text>
-      <a-text id="inventory-label" value="Inventory:" color="#FFF" position="-0.8 0.3 0" width="2"></a-text>
-      <a-text id="inventory-list" value="Nothing yet..." color="#FFF" position="-0.8 0.1 0" width="2"></a-text>
-    </a-entity>
+    <!-- Ambient spooky audio -->
+    <a-sound
+      src="https://cdn.aframe.io/basic-guide/audio/backgroundnoise.wav"
+      autoplay="true"
+      loop="true"
+      volume="0.15"
+      position="0 2 0"
+      crossorigin="anonymous"
+      preload="auto"
+      aria-hidden="true"
+    ></a-sound>
 
   </a-scene>
 
-  <script src="game.js"></script>
+  <!-- Player controls script -->
+  <script>
+    AFRAME.registerComponent('player-controls', {
+      schema: {},
+      init: function () {
+        this.cameraRig = this.el;
+        this.velocity = new THREE.Vector3();
+        this.direction = new THREE.Vector3();
+        this.moveSpeed = 5; // units per second
+        this.keys = {};
+        this.bound = 95; // Maze bounds to keep player inside
+
+        window.addEventListener('keydown', e => {
+          this.keys[e.code] = true;
+        });
+        window.addEventListener('keyup', e => {
+          this.keys[e.code] = false;
+        });
+      },
+      tick: function (time, deltaTime) {
+        const dt = deltaTime / 1000;
+        const el = this.cameraRig;
+
+        this.direction.set(0, 0, 0);
+
+        if (this.keys['KeyW'] || this.keys['ArrowUp']) this.direction.z -= 1;
+        if (this.keys['KeyS'] || this.keys['ArrowDown']) this.direction.z += 1;
+        if (this.keys['KeyA'] || this.keys['ArrowLeft']) this.direction.x -= 1;
+        if (this.keys['KeyD'] || this.keys['ArrowRight']) this.direction.x += 1;
+
+        this.direction.normalize();
+
+        el.object3D.position.x += this.direction.x * this.moveSpeed * dt;
+        el.object3D.position.z += this.direction.z * this.moveSpeed * dt;
+
+        // Keep player inside maze bounds
+        el.object3D.position.x = THREE.MathUtils.clamp(el.object3D.position.x, -this.bound, this.bound);
+        el.object3D.position.z = THREE.MathUtils.clamp(el.object3D.position.z, -this.bound, this.bound);
+      }
+    });
+  </script>
+
+  <!-- Game Logic script -->
+  <script>
+    // Inventory & Sanity
+    const inventory = [];
+    let sanity = 100;
+
+    const inventoryList = document.getElementById('inventory-list');
+    const sanityDisplay = document.getElementById('sanity-display');
+    const notification = document.getElementById('notification');
+    let notificationTimeoutId = null;
+
+    function showNotification(msg, duration = 4000) {
+      if (notificationTimeoutId) clearTimeout(notificationTimeoutId);
+      notification.textContent = msg;
+      notification.classList.add('show');
+      notificationTimeoutId = setTimeout(() => {
+        notification.classList.remove('show');
+        notification.textContent = '';
+        notificationTimeoutId = null;
+      }, duration);
+    }
+
+    function updateInventoryUI() {
+      if (!inventoryList) return;
+      inventoryList.innerHTML = '';
+      if (inventory.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'Nothing yet...';
+        li.setAttribute('tabindex', '0');
+        inventoryList.appendChild(li);
+        return;
+      }
+      inventory.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        li.setAttribute('tabindex', '0');
+        inventoryList.appendChild(li);
+      });
+    }
+
+    function updateSanityUI() {
+      sanityDisplay.textContent = `Sanity: ${sanity}%`;
+      const greenValue = Math.floor(255 * sanity / 100);
+      const redValue = 255 - greenValue;
+      sanityDisplay.style.color = `rgb(${redValue}, ${greenValue}, 0)`;
+    }
+
+    function adjustSanity(amount) {
+      sanity = Math.min(100, Math.max(0, sanity + amount));
+      updateSanityUI();
+    }
+
+    function addItemToInventory(itemName) {
+      if (inventory.includes(itemName)) {
+        showNotification(`You already have ${itemName}.`);
+        adjustSanity(-5);
+        return;
+      }
+      inventory.push(itemName);
+      updateInventoryUI();
+      showNotification(`Picked up ${itemName}!`);
+      adjustSanity(10);
+    }
+
+    // Shelf & mannequin data and setup (same as you gave me)
+    const aisleData = Array.from({ length: 12 }, (_, i) => {
+      const row = Math.floor(i / 4);
+      const col = i % 4;
+      return {
+        name: `Aisle ${i + 1}`,
+        colorShelf: `hsl(${(i * 30) % 360}, 60%, 55%)`,
+        colorSupport: `hsl(${(i * 30 + 20) % 360}, 40%, 40%)`,
+        position: { x: col * 20 - 30, y: 0, z: row * 20 - 30 },
+        products: Array.from({ length: 8 }, (_, j) => ({
+          name: `Item ${i + 1}-${j + 1}`,
+          color: `hsl(${(j * 40) % 360}, 70%, 60%)`,
+          shape: ["box", "sphere", "cylinder"][j % 3]
+        }))
+      };
+    });
+
+    function createShelf(x, y, z, width, height, depth, color) {
+      const shelf = document.createElement('a-box');
+      shelf.setAttribute('position', `${x} ${y} ${z}`);
+      shelf.setAttribute('width', width);
+      shelf.setAttribute('height', height);
+      shelf.setAttribute('depth', depth);
+      shelf.setAttribute('color', color);
+      shelf.setAttribute('shadow', 'cast: true; receive: true');
+      return shelf;
+    }
+
+    function createSupport(x, y, z, width, height, depth, color) {
+      const support = document.createElement('a-box');
+      support.setAttribute('position', `${x} ${y} ${z}`);
+      support.setAttribute('width', width);
+      support.setAttribute('height', height);
+      support.setAttribute('depth', depth);
+      support.setAttribute('color', color);
+      support.setAttribute('shadow', 'cast: true; receive: true');
+      return support;
+    }
+
+    function createProduct(x, y, z, color, shape, name) {
+      let el;
+      switch (shape) {
+        case "box":
+          el = document.createElement('a-box');
+          el.setAttribute('width', 1);
+          el.setAttribute('height', 1);
+          el.setAttribute('depth', 0.5);
+          break;
+        case "cylinder":
+          el = document.createElement('a-cylinder');
+          el.setAttribute('radius', 0.5);
+          el.setAttribute('height', 1.4);
+          break;
+        case "sphere":
+          el = document.createElement('a-sphere');
+          el.setAttribute('radius', 0.7);
+          break;
+        default:
+          el = document.createElement('a-box');
+          el.setAttribute('width', 1);
+          el.setAttribute('height', 1);
+          el.setAttribute('depth', 0.5);
+      }
+      el.setAttribute('color', color);
+      el.setAttribute('position', `${x} ${y} ${z}`);
+      el.classList.add('clickable');
+      el.setAttribute('data-item', name);
+      el.setAttribute('shadow', 'cast: true');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('role', 'button');
+      el.setAttribute('aria-label', name);
+      return el;
+    }
+
+    const aislesContainer = document.getElementById('shelves-container');
+
+    function setupAisles() {
+      if (!aislesContainer) {
+        console.warn("shelves-container not found!");
+        return;
+      }
+
+      aisleData.forEach(aisle => {
+        const aisleEntity = document.createElement('a-entity');
+        aisleEntity.setAttribute('position', `${aisle.position.x} 0 ${aisle.position.z}`);
+
+        for (let i = 0; i < 4; i++) {
+          const shelf = createShelf(0, 0.75 + i * 1, 0, 12, 0.3, 1.5, aisle.colorShelf);
+          aisleEntity.appendChild(shelf);
+        }
+
+        aisleEntity.appendChild(createSupport(-5.8, 2, 0.7, 0.3, 4, 0.3, aisle.colorSupport));
+        aisleEntity.appendChild(createSupport(5.8, 2, 0.7, 0.3, 4, 0.3, aisle.colorSupport));
+        aisleEntity.appendChild(createSupport(-5.8, 2, -0.7, 0.3, 4, 0.3, aisle.colorSupport));
+        aisleEntity.appendChild(createSupport(5.8, 2, -0.7, 0.3, 4, 0.3, aisle.colorSupport));
+
+        aisle.products.forEach((prod, index) => {
+          const shelfLevel = index % 4;
+          const xPos = -5 + (index * 3) % 12;
+          const yPos = 1 + shelfLevel * 1;
+          const product = createProduct(xPos, yPos, 0, prod.color, prod.shape, prod.name);
+          aisleEntity.appendChild(product);
+        });
+
+        const sign = document.createElement('a-text');
+        sign.setAttribute('value', aisle.name);
+        sign.setAttribute('position', `0 4 0`);
+        sign.setAttribute('align', 'center');
+        sign.setAttribute('color', aisle.colorShelf);
+        sign.setAttribute('shader', 'msdf');
+        sign.setAttribute('font', 'mozillavr');
+        sign.setAttribute('emissive', aisle.colorShelf);
+        sign.setAttribute('emissiveIntensity', '3');
+        sign.setAttribute('scale', '3 3 3');
+        sign.setAttribute('shadow', 'cast: true');
+        aisleEntity.appendChild(sign);
+
+        aislesContainer.appendChild(aisleEntity);
+      });
+    }
+
+    document.querySelector('a-scene').addEventListener('click', evt => {
+      const target = evt.target;
+      if (target.classList.contains('clickable')) {
+        const item = target.getAttribute('data-item');
+        if (item) {
+          addItemToInventory(item);
+        }
+      }
+    });
+
+    document.querySelector('a-scene').addEventListener('keydown', evt => {
+      if (evt.key === 'Enter' || evt.key === ' ') {
+        const el = document.activeElement;
+        if (el.classList && el.classList.contains('clickable')) {
+          el.click();
+        }
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupAisles();
+      setupMannequins();
+      updateInventoryUI();
+      updateSanityUI();
+    });
+  </script>
+
 </body>
 </html>
+
